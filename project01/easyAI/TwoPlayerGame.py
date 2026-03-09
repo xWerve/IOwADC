@@ -112,10 +112,10 @@ class TwoPlayerGame(ABC):
             self.make_move(move)
 
             if verbose:
-                print(
-                    "\nMove #%d: player %d plays %s :"
-                    % (self.nmove, self.current_player, str(move))
-                )
+                # print(
+                #     "\nMove #%d: player %d plays %s :"
+                #     % (self.nmove, self.current_player, str(move))
+                # )
                 self.show()
 
             self.switch_player()

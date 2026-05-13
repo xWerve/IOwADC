@@ -15,8 +15,8 @@ from maze_env import MazeEnv
 
 # ─── Q-learning ───────────────────────────────────────────────────────────────
 
-GRID   = 20
-N_KEYS = 6
+GRID   = 40
+N_KEYS = 10
 N_OBS  = GRID * GRID * (2 ** N_KEYS)
 N_ACT  = 4
 

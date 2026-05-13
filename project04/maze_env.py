@@ -3,32 +3,33 @@ from gymnasium import spaces
 import numpy as np
 import pygame
 import pygame.font
-import sys
 
 # ─── Kolory ───────────────────────────────────────────────────────────────────
 BLACK   = (15,  15,  20)
 WHITE   = (240, 238, 230)
 GRAY    = (50,  52,  60)
-WALL    = (35,  38,  50)
+WALL    = (100, 105, 120)
 FLOOR   = (22,  24,  32)
 PLAYER  = (80, 160, 255)
 GOAL    = (120, 220, 100)
-KEY_COLORS = [
-    (240, 180, 50), (100, 210, 180), (210, 110, 230),
-    (230, 130, 100), (150, 200, 255), (180, 240, 100)
-]
-DOOR_COLORS = [
-    (200, 140, 30), (60, 170, 140), (170, 70, 200),
-    (190, 90, 60), (100, 150, 200), (130, 190, 70)
-]
 TP_IN   = (140, 130, 240)
-TP_OUT  = (90,  200, 240)
 HUD_BG  = (18,  20,  28)
 
+KEY_COLORS =[
+    (240, 180, 50), (100, 210, 180), (210, 110, 230), (230, 130, 100),
+    (150, 200, 255), (180, 240, 100), (255, 120, 150), (50,  255, 200),
+    (200, 150, 50), (150, 50,  255)
+]
+DOOR_COLORS =[
+    (200, 140, 30), (60,  170, 140), (170, 70,  200), (190, 90,  60),
+    (100, 150, 200), (130, 190, 70),  (200, 90,  120), (40,  200, 160),
+    (160, 120, 40), (120, 40,  200)
+]
+
 # ─── Rozmiar siatki i okna ────────────────────────────────────────────────────
-GRID    = 20
-CELL    = 32
-HUD_W   = 220
+GRID    = 40
+CELL    = 24
+HUD_W   = 280
 WIN_W   = GRID * CELL + HUD_W
 WIN_H   = GRID * CELL
 # ─── Kierunki ────────────────────────────────────────────────────────────────
@@ -56,7 +57,7 @@ def generate_maze(rows, cols, seed=42):
 
     carve(0, 0, set())
 
-    for _ in range(100):
+    for _ in range(400):
         x, y = rng.integers(0, cols), rng.integers(0, rows)
         dirs = [(0, -1, N, S), (1, 0, E, W), (0, 1, S, N), (-1, 0, W, E)]
         dx, dy, w, ow = dirs[rng.integers(0, 4)]
@@ -65,45 +66,47 @@ def generate_maze(rows, cols, seed=42):
             walls[y][x] &= ~w
             walls[ny][nx] &= ~ow
 
-    for x in range(13, 20):
-        walls[19][x] |= N
-        if x > 0:
-            walls[19][x] &= ~W
-            walls[19][x - 1] &= ~E
+    for x in range(29, 40):
+        walls[39][x] |= N
+        walls[38][x] |= S
 
-    walls[19][13] &= ~N
-    if 18 < rows: walls[18][13] &= ~S
+        if x > 0:
+            walls[39][x] &= ~W
+            walls[39][x - 1] &= ~E
+
+    walls[39][29] &= ~N
+    walls[38][29] &= ~S
 
     return walls
 
 class MazeEnv(gym.Env):
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 30}
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 60}
 
-    N_KEYS = 6
+    N_KEYS = 10
     KEYS = [
-        {"pos": (1, 1), "id": 0},  # Lewa góra
-        {"pos": (18, 1), "id": 1},  # Prawa góra
-        {"pos": (1, 15), "id": 2},  # Lewy dół
-        {"pos": (10, 10), "id": 3},  # Środek
-        {"pos": (18, 8), "id": 4},  # Prawa strona
-        {"pos": (5, 18), "id": 5},  # Dół
+        {"pos": (2, 2), "id": 0}, {"pos": (37, 2), "id": 1},
+        {"pos": (2, 37), "id": 2}, {"pos": (20, 20), "id": 3},
+        {"pos": (10, 30), "id": 4}, {"pos": (30, 10), "id": 5},
+        {"pos": (15, 5), "id": 6}, {"pos": (5, 15), "id": 7},
+        {"pos": (35, 25), "id": 8}, {"pos": (25, 35), "id": 9},
     ]
     DOORS = [
-        {"pos": (14, 19), "key": 0},
-        {"pos": (15, 19), "key": 1},
-        {"pos": (16, 19), "key": 2},
-        {"pos": (17, 19), "key": 3},
-        {"pos": (18, 19), "key": 4},
-        {"pos": (19, 19), "key": 5},
+        {"pos": (30, 39), "key": 0}, {"pos": (31, 39), "key": 1},
+        {"pos": (32, 39), "key": 2}, {"pos": (33, 39), "key": 3},
+        {"pos": (34, 39), "key": 4}, {"pos": (35, 39), "key": 5},
+        {"pos": (36, 39), "key": 6}, {"pos": (37, 39), "key": 7},
+        {"pos": (38, 39), "key": 8}, {"pos": (39, 39), "key": 9},
     ]
     TELEPORTS = [
-        {"p1": (0, 0), "p2": (10, 11)},
-        {"p1": (19, 0), "p2": (1, 19)},
+        {"p1": (5, 5), "p2": (35, 35)},
+        {"p1": (5, 35), "p2": (35, 5)},
+        {"p1": (20, 2), "p2": (20, 37)},
+        {"p1": (2, 20), "p2": (37, 20)},
     ]
     START = (0, 0)
-    GOAL = (19, 19)
+    GOAL = (39, 39)
 
-    def __init__(self, render_mode=None, maze_seed=42):
+    def __init__(self, render_mode=None, maze_seed=41):
         super().__init__()
         self.render_mode = render_mode
         self.maze_seed   = maze_seed
@@ -236,60 +239,69 @@ class MazeEnv(gym.Env):
         for gy in range(GRID):
             for gx in range(GRID):
                 rx, ry = gx * CELL, gy * CELL
-                pygame.draw.rect(surf, FLOOR, (rx+1, ry+1, CELL-2, CELL-2))
+                pygame.draw.rect(surf, FLOOR, (rx, ry, CELL, CELL))
 
                 w = self.walls[gy][gx]
-                thick = 4
-                if w & N: pygame.draw.line(surf, WALL, (rx, ry),          (rx+CELL, ry),          thick)
-                if w & E: pygame.draw.line(surf, WALL, (rx+CELL, ry),     (rx+CELL, ry+CELL),     thick)
-                if w & S: pygame.draw.line(surf, WALL, (rx, ry+CELL),     (rx+CELL, ry+CELL),     thick)
-                if w & W: pygame.draw.line(surf, WALL, (rx, ry),          (rx, ry+CELL),           thick)
+                thick = 2
+
+                if w & N: pygame.draw.line(surf, WALL, (rx, ry), (rx + CELL, ry), thick)
+                if w & E: pygame.draw.line(surf, WALL, (rx + CELL - 1, ry), (rx + CELL - 1, ry + CELL), thick)
+                if w & S: pygame.draw.line(surf, WALL, (rx, ry + CELL - 1), (rx + CELL, ry + CELL - 1), thick)
+                if w & W: pygame.draw.line(surf, WALL, (rx, ry), (rx, ry + CELL), thick)
+
 
         # ── Cel ──
         gx, gy = self.GOAL
-        star_surf = pygame.font.SysFont("segoe ui emoji", 34).render("★", True, GOAL)
-        surf.blit(star_surf, (gx*CELL + 14, gy*CELL + 12))
+        margin_g = max(2, int(CELL * 0.15))
+        pygame.draw.rect(surf, GOAL,
+                         (gx * CELL + margin_g, gy * CELL + margin_g, CELL - 2 * margin_g, CELL - 2 * margin_g))
+        pygame.draw.rect(surf, WHITE,
+                         (gx * CELL + margin_g, gy * CELL + margin_g, CELL - 2 * margin_g, CELL - 2 * margin_g), 2)
 
         # ── Teleporty ──
         for tp in self.TELEPORTS:
             for pos in (tp["p1"], tp["p2"]):
                 tx, ty = pos
-                pygame.draw.circle(surf, TP_IN, (tx * CELL + CELL // 2, ty * CELL + CELL // 2), CELL // 2 - 6, 3)
-                lbl = self._font_small.render("⭕"[0], True, TP_IN)
-                surf.blit(lbl, (tx * CELL + CELL // 2 - 6, ty * CELL + CELL // 2 - 8))
+                cx, cy = tx * CELL + CELL // 2, ty * CELL + CELL // 2
+                radius = int(CELL * 0.35)
+                thickness = max(1, int(CELL * 0.1))
+                pygame.draw.circle(surf, TP_IN, (cx, cy), radius, thickness)
 
         # ── Klucze ──
         for k in self.KEYS:
             if not (self._keys & (1 << k["id"])):
                 kx, ky = k["pos"]
                 col = KEY_COLORS[k["id"]]
-                pygame.draw.polygon(surf, col, [
-                    (kx*CELL+CELL//2, ky*CELL+12),
-                    (kx*CELL+CELL-12, ky*CELL+CELL//2),
-                    (kx*CELL+CELL//2, ky*CELL+CELL-12),
-                    (kx*CELL+12,      ky*CELL+CELL//2),
-                ])
-                lbl = self._font_small.render(f"K{k['id']+1}", True, BLACK)
-                surf.blit(lbl, (kx*CELL+CELL//2-10, ky*CELL+CELL//2-7))
+                cx, cy = kx * CELL + CELL // 2, ky * CELL + CELL // 2
+                margin = int(CELL * 0.15)
+                points = [
+                    (cx, ky * CELL + margin),  # góra
+                    (kx * CELL + CELL - margin, cy),  # prawo
+                    (cx, ky * CELL + CELL - margin),  # dół
+                    (kx * CELL + margin, cy)  # lewo
+                ]
+                pygame.draw.polygon(surf, col, points)
 
         # ── Drzwi ──
         for d in self.DOORS:
             dx, dy = d["pos"]
-            col  = DOOR_COLORS[d["key"]]
+            col = DOOR_COLORS[d["key"]]
             unlocked = bool(self._keys & (1 << d["key"]))
+            margin = int(CELL * 0.1)
+            rect = (dx * CELL + margin, dy * CELL + margin, CELL - 2 * margin, CELL - 2 * margin)
+
             if not unlocked:
-                pygame.draw.rect(surf, col, (dx*CELL+4, dy*CELL+4, CELL-8, CELL-8), 4, border_radius=6)
-                lbl = self._font_small.render(f"K{d['key']+1}", True, col)
-                surf.blit(lbl, (dx*CELL+CELL//2-8, dy*CELL+CELL//2-7))
+                thickness = max(2, int(CELL * 0.2))
+                pygame.draw.rect(surf, col, rect, thickness, border_radius=4)
             else:
-                pygame.draw.rect(surf, col, (dx*CELL+4, dy*CELL+4, CELL-8, CELL-8), 1, border_radius=6)
-                lbl = self._font_small.render("OPEN", True, col)
-                surf.blit(lbl, (dx*CELL+CELL//2-14, dy*CELL+CELL//2-7))
+                pygame.draw.rect(surf, col, rect, 1, border_radius=4)
 
         # ── Gracz ──
         px, py = self._px, self._py
-        pygame.draw.circle(surf, PLAYER, (px*CELL+CELL//2, py*CELL+CELL//2), CELL//2-8)
-        pygame.draw.circle(surf, WHITE,  (px*CELL+CELL//2, py*CELL+CELL//2), CELL//2-8, 2)
+        cx, cy = px * CELL + CELL // 2, py * CELL + CELL // 2
+        p_radius = int(CELL * 0.4)
+        pygame.draw.circle(surf, PLAYER, (cx, cy), p_radius)
+        pygame.draw.circle(surf, WHITE, (cx, cy), p_radius, max(1, int(CELL * 0.05)))
 
         # ── HUD ───────────────────────────────────────────────────────────────
         hx = GRID * CELL
@@ -322,23 +334,24 @@ class MazeEnv(gym.Env):
         pygame.draw.line(surf, GRAY, (hx + 10, 232), (hx + HUD_W - 10, 232), 1)
         hud_text("KLUCZE", hx + 10, 242, GRAY)
         for i in range(self.N_KEYS):
-            row = i // 3
-            col_idx = i % 3
+            row = i // 5
+            col_idx = i % 5
             has = bool(self._keys & (1 << i))
             color = KEY_COLORS[i] if has else (50, 52, 60)
 
-            kx = hx + 10 + col_idx * 65
+            kx = hx + 10 + col_idx * 52
             ky = 260 + row * 35
 
-            pygame.draw.rect(surf, color, (kx, ky, 55, 28), border_radius=4)
+            pygame.draw.rect(surf, color, (kx, ky, 45, 28), border_radius=4)
             if not has:
-                pygame.draw.rect(surf, (70, 72, 82), (kx, ky, 55, 28), 1, border_radius=4)
+                pygame.draw.rect(surf, (70, 72, 82), (kx, ky, 45, 28), 1, border_radius=4)
 
             lbl = self._font_small.render(f"K{i + 1}", True, BLACK if has else (100, 102, 112))
-            surf.blit(lbl, (kx + 15, ky + 7))
+            surf.blit(lbl, (kx + 10, ky + 7))
 
-        pygame.draw.line(surf, GRAY, (hx+10, 340), (hx+HUD_W-10, 340), 1)
-        hud_text("LEGENDA", hx+10, 350, GRAY)
+        pygame.draw.line(surf, GRAY, (hx + 10, 340), (hx + HUD_W - 10, 340), 1)
+        hud_text("LEGENDA", hx + 10, 350, GRAY)
+
         legends = [
             (KEY_COLORS[0], "◆ klucz"),
             (DOOR_COLORS[0], "▣ drzwi"),

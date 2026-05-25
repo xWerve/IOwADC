@@ -232,6 +232,35 @@ class MazeEnv(gym.Env):
             self._font_big   = pygame.font.SysFont("monospace", 18, bold=True)
             self._font_small = pygame.font.SysFont("monospace", 13)
 
+            # Załaduj ikonki PNG i przeskaluj do rozmiaru komórki
+            import os
+            base = os.path.dirname(os.path.abspath(__file__))
+
+            def _load_icon(filename):
+                path = os.path.join(base, filename)
+                if os.path.exists(path):
+                    img = pygame.image.load(path).convert_alpha()
+                    return pygame.transform.smoothscale(img, (CELL, CELL))
+                return None
+
+            self._img_key    = _load_icon("key.png")
+            self._img_door   = _load_icon("door.png")
+            self._img_portal = _load_icon("portal.png")
+
+            # Kolorowe wersje ikon — tintujemy przez Surface z BLEND_RGBA_MULT
+            def _tint(base_img, color):
+                if base_img is None:
+                    return None
+                tinted = base_img.copy()
+                r, g, b = color[:3]
+                tint_surf = pygame.Surface((CELL, CELL), pygame.SRCALPHA)
+                tint_surf.fill((r, g, b, 255))
+                tinted.blit(tint_surf, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+                return tinted
+
+            self._key_imgs  = [_tint(self._img_key,  c) for c in KEY_COLORS]
+            self._door_imgs = [_tint(self._img_door, c) for c in DOOR_COLORS]
+
         surf = self._screen
         surf.fill(BLACK)
 
@@ -262,39 +291,57 @@ class MazeEnv(gym.Env):
         for tp in self.TELEPORTS:
             for pos in (tp["p1"], tp["p2"]):
                 tx, ty = pos
-                cx, cy = tx * CELL + CELL // 2, ty * CELL + CELL // 2
-                radius = int(CELL * 0.35)
-                thickness = max(1, int(CELL * 0.1))
-                pygame.draw.circle(surf, TP_IN, (cx, cy), radius, thickness)
+                if self._img_portal:
+                    surf.blit(self._img_portal, (tx * CELL, ty * CELL))
+                else:
+                    cx, cy = tx * CELL + CELL // 2, ty * CELL + CELL // 2
+                    radius = int(CELL * 0.35)
+                    thickness = max(1, int(CELL * 0.1))
+                    pygame.draw.circle(surf, TP_IN, (cx, cy), radius, thickness)
 
         # ── Klucze ──
         for k in self.KEYS:
             if not (self._keys & (1 << k["id"])):
                 kx, ky = k["pos"]
                 col = KEY_COLORS[k["id"]]
-                cx, cy = kx * CELL + CELL // 2, ky * CELL + CELL // 2
-                margin = int(CELL * 0.15)
-                points = [
-                    (cx, ky * CELL + margin),  # góra
-                    (kx * CELL + CELL - margin, cy),  # prawo
-                    (cx, ky * CELL + CELL - margin),  # dół
-                    (kx * CELL + margin, cy)  # lewo
-                ]
-                pygame.draw.polygon(surf, col, points)
+                img = self._key_imgs[k["id"]] if self._key_imgs[k["id"]] else None
+                if img:
+                    surf.blit(img, (kx * CELL, ky * CELL))
+                else:
+                    cx, cy = kx * CELL + CELL // 2, ky * CELL + CELL // 2
+                    margin = int(CELL * 0.15)
+                    points = [
+                        (cx, ky * CELL + margin),
+                        (kx * CELL + CELL - margin, cy),
+                        (cx, ky * CELL + CELL - margin),
+                        (kx * CELL + margin, cy)
+                    ]
+                    pygame.draw.polygon(surf, col, points)
 
         # ── Drzwi ──
         for d in self.DOORS:
             dx, dy = d["pos"]
             col = DOOR_COLORS[d["key"]]
             unlocked = bool(self._keys & (1 << d["key"]))
-            margin = int(CELL * 0.1)
-            rect = (dx * CELL + margin, dy * CELL + margin, CELL - 2 * margin, CELL - 2 * margin)
-
-            if not unlocked:
-                thickness = max(2, int(CELL * 0.2))
-                pygame.draw.rect(surf, col, rect, thickness, border_radius=4)
+            img = self._door_imgs[d["key"]] if self._door_imgs[d["key"]] else None
+            if img:
+                if unlocked:
+                    # Przyciemnij ikonę gdy odblokowane
+                    dimmed = img.copy()
+                    dim_surf = pygame.Surface((CELL, CELL), pygame.SRCALPHA)
+                    dim_surf.fill((100, 100, 100, 180))
+                    dimmed.blit(dim_surf, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+                    surf.blit(dimmed, (dx * CELL, dy * CELL))
+                else:
+                    surf.blit(img, (dx * CELL, dy * CELL))
             else:
-                pygame.draw.rect(surf, col, rect, 1, border_radius=4)
+                margin = int(CELL * 0.1)
+                rect = (dx * CELL + margin, dy * CELL + margin, CELL - 2 * margin, CELL - 2 * margin)
+                if not unlocked:
+                    thickness = max(2, int(CELL * 0.2))
+                    pygame.draw.rect(surf, col, rect, thickness, border_radius=4)
+                else:
+                    pygame.draw.rect(surf, col, rect, 1, border_radius=4)
 
         # ── Gracz ──
         px, py = self._px, self._py

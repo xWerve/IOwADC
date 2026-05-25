@@ -79,6 +79,12 @@ def load_results(results_dir: str, hp_name: str, arch_name: str) -> dict[str, An
     for i, r in enumerate(all_rewards):
         padded[i, : len(r)] = r
 
+    # Ensure timesteps covers full max_len
+    if len(timesteps) < max_len:
+        step = int(timesteps[-1] - timesteps[-2]) if len(timesteps) > 1 else 5000
+        extra = np.arange(1, max_len - len(timesteps) + 1) * step + timesteps[-1]
+        timesteps = np.concatenate([timesteps, extra])
+
     return {
         "timesteps": timesteps[:max_len],
         "rewards": padded,

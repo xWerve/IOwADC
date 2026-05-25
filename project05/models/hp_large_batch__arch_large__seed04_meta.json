@@ -1,0 +1,24 @@
+{
+  "run_id": "hp_large_batch__arch_large__seed04",
+  "hp_name": "hp_large_batch",
+  "arch_name": "arch_large",
+  "seed": 4,
+  "timesteps_trained": 400000,
+  "hyperparams": {
+    "learning_rate": 0.0003,
+    "batch_size": 512,
+    "tau": 0.02,
+    "gamma": 0.995,
+    "learning_starts": 10000,
+    "buffer_size": 300000,
+    "ent_coef": "auto"
+  },
+  "architecture": {
+    "net_arch": "[256, 256]",
+    "activation_fn": "<class 'torch.nn.modules.activation.ReLU'>",
+    "use_sde": "False"
+  },
+  "device": "cuda",
+  "env_id": "BipedalWalker-v3",
+  "elapsed_sec": 1850.8397216619924
+}

@@ -1,0 +1,5 @@
+stable-baselines3[extra]>=2.3.0
+gymnasium[box2d]>=0.29.0
+torch>=2.0.0
+matplotlib>=3.8.0
+numpy>=1.26.0

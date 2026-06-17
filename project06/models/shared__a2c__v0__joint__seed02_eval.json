@@ -1,0 +1,10 @@
+{
+  "run_id": "shared__a2c__v0__joint__seed02",
+  "experiment": "shared",
+  "algo": "a2c",
+  "variant": "v0",
+  "seed": 2,
+  "n_episodes": 20,
+  "mean_reward": 3.3489999999999993,
+  "std_reward": 1.3375421488685872
+}

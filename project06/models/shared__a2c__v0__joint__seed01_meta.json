@@ -1,0 +1,57 @@
+{
+  "run_id": "shared__a2c__v0__joint__seed01",
+  "experiment": "shared",
+  "algo": "a2c",
+  "variant": "v0",
+  "seed": 1,
+  "device": "cpu",
+  "env_cfg": {
+    "grid_size": 9,
+    "n_coins": 4,
+    "max_steps": 65,
+    "shared_reward": true,
+    "individual_bonus": 0.0,
+    "step_penalty": -0.01,
+    "distance_shaping": 0.02,
+    "fixed_walls": [
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        6,
+        4
+      ],
+      [
+        6,
+        5
+      ]
+    ],
+    "n_random_walls": 0,
+    "seed": null
+  },
+  "timesteps_trained": 200000,
+  "hyperparams": {
+    "learning_rate": 0.0007,
+    "n_steps": 32,
+    "gamma": 0.99,
+    "gae_lambda": 1.0,
+    "ent_coef": 0.0,
+    "vf_coef": 0.5,
+    "max_grad_norm": 0.5
+  },
+  "final_deterministic_mean": 2.655499999999999,
+  "elapsed_sec": 91.71305465800106
+}

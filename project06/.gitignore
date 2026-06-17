@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+training.log
+report/*.aux
+report/*.log
+report/*.out
+models/*.zip
+!models/best_model.zip

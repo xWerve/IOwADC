@@ -1,0 +1,58 @@
+{
+  "run_id": "shared__ppo__v0__joint__seed01",
+  "experiment": "shared",
+  "algo": "ppo",
+  "variant": "v0",
+  "seed": 1,
+  "device": "cpu",
+  "env_cfg": {
+    "grid_size": 9,
+    "n_coins": 4,
+    "max_steps": 65,
+    "shared_reward": true,
+    "individual_bonus": 0.0,
+    "step_penalty": -0.01,
+    "distance_shaping": 0.02,
+    "fixed_walls": [
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        6,
+        4
+      ],
+      [
+        6,
+        5
+      ]
+    ],
+    "n_random_walls": 0,
+    "seed": null
+  },
+  "timesteps_trained": 200000,
+  "hyperparams": {
+    "learning_rate": 0.0003,
+    "n_steps": 2048,
+    "batch_size": 256,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "ent_coef": 0.01,
+    "clip_range": 0.2,
+    "n_epochs": 10
+  },
+  "final_deterministic_mean": 1.902,
+  "elapsed_sec": 94.32236730300065
+}

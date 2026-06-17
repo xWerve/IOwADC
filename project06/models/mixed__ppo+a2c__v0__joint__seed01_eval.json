@@ -1,0 +1,8 @@
+{
+  "run_id": "mixed__ppo+a2c__v0__joint__seed01",
+  "experiment": "mixed",
+  "seed": 1,
+  "n_episodes": 20,
+  "mean_reward": 2.3539999999999996,
+  "std_reward": 1.502242989665786
+}

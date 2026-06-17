@@ -1,0 +1,10 @@
+{
+  "run_id": "shared__ppo__v0__joint__seed02",
+  "experiment": "shared",
+  "algo": "ppo",
+  "variant": "v0",
+  "seed": 2,
+  "n_episodes": 20,
+  "mean_reward": 2.743999999999999,
+  "std_reward": 1.5994667861509344
+}
